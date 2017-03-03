@@ -1,0 +1,16 @@
+from pyspark.streaming import StreamingContext
+from pyspark.streaming.flume import FlumeUtils
+
+
+sc = SparkContext(appName="PythonStreamingFlumeIpsCount")
+from pyspark.streaming import StreamingContext
+from pyspark.streaming.flume import FlumeUtils
+ssc = StreamingContext(sc, 10)
+
+kvs = FlumeUtils.createStream(ssc,"localhost", 9999)
+lines = kvs.map(lambda x: x[1])
+counts = lines.map(lambda line: (line.split()[0], 1)).reduceByKey(lambda a, b: a+b)
+counts.saveAsTextFiles("/tmp/streaming/")
+
+ssc.start()
+ssc.awaitTermination()
